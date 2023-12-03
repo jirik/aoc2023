@@ -28,7 +28,16 @@ def main():
         coords_per_number = [(n, get_rect_coords(*coords)) for n, *coords in read_coords(r'\d+', lines)]
 
         r1 = sum(int(n) for n, n_coords in coords_per_number if bool(n_coords & all_symbol_coords))
-        print(file_path, r1)
+
+        star_coords = {(r, c) for _, r, c, _ in read_coords(r'\*', lines)}
+        r2 = sum(
+            int(coords_per_number[n1idx][0]) * int(coords_per_number[n2idx][0])
+            for sc in star_coords
+            if (n1idx := next((nidx for nidx, (_, coords) in enumerate(coords_per_number) if sc in coords), None)) is not None
+            and (n2idx := next((nidx for nidx, (_, coords) in enumerate(coords_per_number) if sc in coords and nidx != n1idx), None)) is not None
+        )
+
+        print(file_path, r1, r2)
 
 
 if __name__ == "__main__":
