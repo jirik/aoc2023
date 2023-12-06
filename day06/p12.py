@@ -25,9 +25,12 @@ def main():
 
         times, dists = [[int(n) for n in re.split(' +', ln.split(':')[1].strip())] for ln in lines]
         races = list(zip(times, dists))
-
         r1 = reduce(lambda x, y: x*y, [get_race_ways(r) for r in races])
-        print(file_path, r1)
+
+        race = [int(''.join(re.findall(r'\d+', ln))) for ln in lines]
+        r2 = get_race_ways(race)
+
+        print(file_path, r1, r2)
 
 
 if __name__ == "__main__":
