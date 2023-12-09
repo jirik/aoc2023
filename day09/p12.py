@@ -1,17 +1,12 @@
 from functools import reduce
+from itertools import pairwise
 import re, os, math, sys
 
 
 def get_values(history):
-    diffs = [*history]
     seqs = [history]
     while not all(d == 0 for d in seqs[-1]):
-        diffs = [
-            d - diffs[idx - 1]
-            for idx, d in enumerate(diffs)
-            if idx > 0
-        ]
-        seqs.append(diffs)
+        seqs.append([b - a for a, b in pairwise(seqs[-1])])
     return reduce(lambda p, s: s[0] - p, seqs[::-1], 0), reduce(lambda p, s: s[-1] + p, seqs[::-1], 0)
 
 
@@ -20,9 +15,9 @@ def main():
         with open(file_path) as f:
             lines = [ln.strip() for ln in f.readlines()]
 
-        history = [[int(v) for v in ln.split(' ')] for ln in lines]
+        histories = [[int(v) for v in ln.split(' ')] for ln in lines]
 
-        tuples = [get_values(ln) for ln in history]
+        tuples = [get_values(h) for h in histories]
         p_vals, n_vals = zip(*tuples)
         r1 = sum(n_vals)
         r2 = sum(p_vals)
