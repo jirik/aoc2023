@@ -17,19 +17,17 @@ class Graph:
     def add_edge(self, from_node, to_node, weight):
         # Note: assumes edges are bi-directional
         self.edges[from_node].append(to_node)
-        self.edges[to_node].append(from_node)
         self.weights[(from_node, to_node)] = weight
-        self.weights[(to_node, from_node)] = weight
 
 
-def dijkstra(graph, initial, end):
+def dijkstra(graph, initial, ends):
     # shortest paths is a dict of nodes
     # whose value is a tuple of (previous node, weight)
     shortest_paths = {initial: (None, 0)}
     current_node = initial
     visited = set()
 
-    while current_node != end:
+    while current_node not in ends:
         visited.add(current_node)
         destinations = graph.edges[current_node]
         weight_to_current_node = shortest_paths[current_node][1]
@@ -49,7 +47,7 @@ def dijkstra(graph, initial, end):
         # next node is the destination with the lowest weight
         current_node = min(next_destinations, key=lambda k: next_destinations[k][1])
 
-    # Work back through destinations in shortest path
+    # Work back through destinations in the shortest path
     path = []
     while current_node is not None:
         path.append(current_node)
