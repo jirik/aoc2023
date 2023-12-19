@@ -6,6 +6,14 @@ from util import dijkstra, Graph
 from enum import IntEnum, Enum
 
 
+def v_eval(v, expr):
+    return eval(expr, locals())
+
+
+def get_number_of_combinations(cands):
+    return reduce(lambda p, c: p*len(c), cands, 1)
+
+
 def main():
     for file_path in sys.argv[1:]:
         with open(file_path) as f:
@@ -44,7 +52,36 @@ def main():
             if wf_name == 'A':
                 r1 += x + m + a + s
 
-        print(file_path, r1)
+        rating_names = ['x', 'm', 'a', 's']
+
+        r2 = 0
+        wf_cands = {w: [] for w in workflows}
+        wf_cands['in'].append(tuple({i for i in range(1, 4001)} for _ in range(4)))
+        next_wfs = ['in']
+        while next_wfs:
+            wf_name = next_wfs.pop(0)
+            while wf_cands[wf_name]:
+                cands = wf_cands[wf_name].pop(0)
+                for expr, next_wf in workflows[wf_name]:
+                    rating_idx = next((i for i, r in enumerate(rating_names) if r == expr[0]), None)
+                    expr = f"v{expr[1:]}"
+                    next_cands = tuple(
+                        cs.copy() if cs_idx != rating_idx else {v for v in cs if v_eval(v, expr)}
+                        for cs_idx, cs in enumerate(cands)
+                    )
+                    if next_wf == 'A':
+                        r2 += get_number_of_combinations(next_cands)
+                    elif next_wf == 'R':
+                        pass
+                    else:
+                        wf_cands[next_wf].append(next_cands)
+                        next_wfs.append(next_wf)
+                    cands = tuple(
+                        cs.copy() if cs_idx != rating_idx else {v for v in cs if v not in next_cands[cs_idx]}
+                        for cs_idx, cs in enumerate(cands)
+                    )
+
+        print(file_path, r1, r2)
 
 
 if __name__ == "__main__":
