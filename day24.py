@@ -1,12 +1,7 @@
-import copy
-from collections import defaultdict
-from operator import add, sub
-from functools import reduce, lru_cache
-from itertools import pairwise, permutations, combinations, groupby
-import re, os, math, sys
-from util import dijkstra, Graph
-from enum import IntEnum, Enum
+from itertools import combinations
+import sys
 from shapely import LineString, intersection
+import sympy
 
 
 def get_orthog_isctn(ray, orthog_c, orthog_c_idx):
@@ -71,7 +66,19 @@ def main():
             for r1_sg, r2_sg in combinations(ray_segments.values(), 2)
         )
 
-        print(file_path, r1)
+        xs, ys, zs, xd, yd, zd = sympy.symbols("xs, ys, zs, xd, yd, zd", integer=True)
+        equations = []
+        ts = []
+        for idx, ((ray_xs, ray_ys, ray_zs), (ray_xd, ray_yd, ray_zd)) in enumerate(rays[:3]):
+            t = sympy.Symbol(f"t{idx}", integer=True)
+            ts.append(t)
+            equations.append(sympy.Eq(ray_xs + t*ray_xd, xs + t*xd))
+            equations.append(sympy.Eq(ray_ys + t*ray_yd, ys + t*yd))
+            equations.append(sympy.Eq(ray_zs + t*ray_zd, zs + t*zd))
+        solution = sympy.solve(equations, [xs, ys, zs, xd, yd, zd] + ts, dict=True)[0]
+        r2 = solution[xs] + solution[ys] + solution[zs]
+
+        print(file_path, r1, r2)
 
 
 if __name__ == "__main__":
